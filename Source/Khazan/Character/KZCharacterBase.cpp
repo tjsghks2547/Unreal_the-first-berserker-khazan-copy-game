@@ -1,0 +1,79 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "Character/KZCharacterBase.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
+// Sets default values
+AKZCharacterBase::AKZCharacterBase()
+{
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = false;
+
+
+	//Pawn 
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
+
+
+	
+
+
+	//CapSule 
+	GetCapsuleComponent()->InitCapsuleSize(42.0f, 96.0f);
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
+
+
+	//Movement 
+	m_pMoveComponent = GetCharacterMovement();
+
+	m_pMoveComponent->bOrientRotationToMovement = true; 
+	// 이동하는 방향(속도 벡터)을 바라보게 캐릭터의 Yaw 회전 자동 조절
+	m_pMoveComponent->RotationRate = FRotator(0.0f, 2000.f, 0.0f);	
+	// bOrientRotationToMovement()가 true일 때 방향 전환 시 1초에 몇도 속도(Yaw 속도) 로 회전할 지를 결정 
+	m_pMoveComponent->JumpZVelocity = 700.f; 
+	// 점프 시작 시 위쪽(Z)으로 주는 초기속도
+	m_pMoveComponent->AirControl = 0.35f; 
+	// 공중에서 이동 입력 반응 정도 ( 0 = 방향 거의 못 틀음 , 1 = 지상과 동일한 제어 가능) 
+	m_pMoveComponent->MaxWalkSpeed = 1000.f; 
+	// 기본 지상 이동 최대 속도 (cm/s)
+	m_pMoveComponent->MinAnalogWalkSpeed = 0.f; 
+	// 입력이 아주 미세하게 들어왔을 때 보장되는 최소 속도 
+	m_pMoveComponent->BrakingDecelerationWalking = 350.F;
+	// 키를 뗐을 때 서서히 멈추는 감속 가속도
+	m_pMoveComponent->MaxAcceleration = 100000.f;	
+	// 최대 가속도로 입력이 들어오면 해당 값만큼 속도를 키움 
+
+
+	
+
+
+	//Mesh 
+	m_pSkeletalMesh = GetMesh(); 
+	m_pSkeletalMesh->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -100.f), FRotator(0.0f, -90.f, 0.0f));
+
+	//Animation 
+	m_pSkeletalMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	m_pSkeletalMesh->SetCollisionProfileName(TEXT("ChararcterMesh"));
+
+
+	//USkeletalMesh 
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Game/Character/Mesh/Kazan/Kazna_model.Kazna_model"));
+	if (CharacterMeshRef.Object)
+	{
+		m_pSkeletalMesh->SetSkeletalMesh(CharacterMeshRef.Object);
+	}
+
+
+	// 일반 리소스는 FObjectFinder로 찾으며 ( 메시, 머터리얼, 텍스처) 
+	// 블루 프린트 리소스는 FClassFinder로 찾는다 ( 블루 프린트, actor, pawn 등 ) 
+
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/Animation/BP_Khzan.BP_Khzan_C"));
+	if (AnimInstanceClassRef.Class)
+	{
+		m_pSkeletalMesh->SetAnimInstanceClass(AnimInstanceClassRef.Class);
+	}
+}
+
