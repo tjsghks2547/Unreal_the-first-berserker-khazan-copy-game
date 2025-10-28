@@ -5,7 +5,7 @@
 
 AKZGameModeBase::AKZGameModeBase()
 {
-	static ConstructorHelpers::FClassFinder<APawn>  ThirdPersonRef(TEXT("/Script/Khazan.KZCharacter"));
+	static ConstructorHelpers::FClassFinder<APawn>  ThirdPersonRef(TEXT("/Game/Character/BP_Khazan.BP_Khazan_C"));
 	if (ThirdPersonRef.Class)
 	{
 		DefaultPawnClass = ThirdPersonRef.Class;

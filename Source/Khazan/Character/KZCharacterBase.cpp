@@ -4,6 +4,8 @@
 #include "Character/KZCharacterBase.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Animation/AnimMontage.h"
+#include "KZComboActionData_1.h"
 
 // Sets default values
 AKZCharacterBase::AKZCharacterBase()
@@ -70,10 +72,118 @@ AKZCharacterBase::AKZCharacterBase()
 	// 일반 리소스는 FObjectFinder로 찾으며 ( 메시, 머터리얼, 텍스처) 
 	// 블루 프린트 리소스는 FClassFinder로 찾는다 ( 블루 프린트, actor, pawn 등 ) 
 
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/Animation/BP_Khzan.BP_Khzan_C"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Game/Animation/BP_KhzanAnimation.BP_KhzanAnimation_C"));
 	if (AnimInstanceClassRef.Class)
 	{
 		m_pSkeletalMesh->SetAnimInstanceClass(AnimInstanceClassRef.Class);
 	}
+
+
+	// AnimMontage and Asset Data.
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> ComboActionMontageRef(TEXT("/Game/Animation/ComboAttackMontage.ComboAttackMontage"));
+	if (ComboActionMontageRef.Object)
+	{
+		ComboActionMontage = ComboActionMontageRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UKZComboActionData_1> ComboActionDataRef(TEXT("/Game/Character_Action/KZComboAction_1.KZComboAction_1"));
+	if (ComboActionDataRef.Object)
+	{
+		ComboActionData = ComboActionDataRef.Object;
+	}
+
+}
+
+void AKZCharacterBase::ProcessComboCommand()
+{
+	if (m_iCurrentCombo == 0)
+	{
+		ComboActionBegin(); 
+		return; 
+	}
+
+	if (!ComboTimerHandle.IsValid())
+	{
+		HasNexComboCommand = false; 
+	}
+	
+	else
+	{
+		HasNexComboCommand = true; 
+	}
+
+
+
+}
+
+void AKZCharacterBase::ComboActionBegin()
+{
+	// Combo Status
+
+	m_iCurrentCombo = 1; 
+
+	// Movement Setting 
+	//GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None);	// 이동 기능이 사라짐 
+
+	// Animation Setting
+	const float AttackSpeedRate = 1.0f; 
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance->Montage_Play(ComboActionMontage, AttackSpeedRate);
+
+	FOnMontageEnded EndDelegate; 
+	EndDelegate.BindUObject(this, &AKZCharacterBase::ComboActionEnd);
+	AnimInstance->Montage_SetEndDelegate(EndDelegate, ComboActionMontage);
+
+	ComboTimerHandle.Invalidate();
+	SetComboCheckTimer(); 
+
+}
+
+void AKZCharacterBase::ComboActionEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded)
+{
+	ensure(m_iCurrentCombo != 0); 
+	m_iCurrentCombo = 0; 
+
+	//GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);	
+
+}
+
+void AKZCharacterBase::SetComboCheckTimer()
+{
+	int32 ComboIndex = m_iCurrentCombo - 1; 
+	
+	ensure(ComboActionData->EffectiveFrameCount.IsValidIndex(ComboIndex));
+
+	const float AttackSpeedRate = 1.0f; 
+
+	float ComboEffectiveTime = (ComboActionData->EffectiveFrameCount[ComboIndex] / ComboActionData->FrameRate) / AttackSpeedRate;
+
+	if(ComboEffectiveTime > 0.0f)
+	{
+		GetWorld()->GetTimerManager().SetTimer(ComboTimerHandle, this, &AKZCharacterBase::ComboCheck, ComboEffectiveTime, false); 
+		// 여기서 ComboEffectiveTime 값의 "second"로 예약되어 second 만큼 지난 뒤에 ComboCheck 해당 함수가 발동됨.  
+		// 여기서 다시 ComboTimerHandle이 Valid가 되어 true가 된다.
+	}
+
+}
+
+void AKZCharacterBase::ComboCheck()
+{
+	ComboTimerHandle.Invalidate(); // 콤포 타이머 핸들을 초기화 
+
+	if(HasNexComboCommand)
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+		m_iCurrentCombo = FMath::Clamp(m_iCurrentCombo + 1, 1, ComboActionData->MaxComboCount);	
+		FName NextSection = *FString::Printf(TEXT("%s%d"), *ComboActionData->MontageSectionNamePrefix, m_iCurrentCombo);
+
+		AnimInstance->Montage_JumpToSection(NextSection, ComboActionMontage);
+
+		SetComboCheckTimer();
+
+		HasNexComboCommand = false; // 입력값 초기화
+	}
+
 }
 

@@ -44,5 +44,5 @@ void UKZAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 void UKZAnimInstance::AnimNotify_stopattack()
 {
-	m_bIsAttack = false;
+	//m_bIsAttack = false;
 }

@@ -70,14 +70,7 @@ void AKZCharacter::BeginPlay()
 	FName WeaponSocket(TEXT("Weapon_R"));
 	if (GetMesh()->DoesSocketExist(WeaponSocket))
 	{
-		//Weapon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WEAPON"));
 		Weapon = NewObject<USkeletalMeshComponent>(this, TEXT("WEAPON"));
-
-		//static ConstructorHelpers::FObjectFinder<UStaticMesh> SW(TEXT("/Script/Engine.SkeletalMesh'/Game/Character/Mesh/Kazan_Weapon/ThiefSpearWeapon.ThiefSpearWeapon'"));
-		//if(SW.Object)
-		//{
-		//    Weapon->SetStaticMesh(SW.Object);
-		//}
 
 		USkeletalMesh* Weapon_Mesh = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/Character/Mesh/Kazan_Weapon/ThiefSpearWeapon.ThiefSpearWeapon"));
 		if (Weapon_Mesh)
@@ -90,7 +83,7 @@ void AKZCharacter::BeginPlay()
 
 
 		// 3) 월드에 등록 (중요!)
-			Weapon->RegisterComponent();
+		Weapon->RegisterComponent();
 
 		// 4) 소켓에 부착
 		Weapon->AttachToComponent(
@@ -156,6 +149,6 @@ void AKZCharacter::Look(const FInputActionValue& Value)
 
 void AKZCharacter::Attack_Spear()
 {
-	m_pAnimInstance->Set_IsAttack(true);	
+	ProcessComboCommand();
 }
 
