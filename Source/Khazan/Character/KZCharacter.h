@@ -12,11 +12,9 @@ UCLASS()
 class KHAZAN_API AKZCharacter : public AKZCharacterBase
 {
 	GENERATED_BODY()
-
 public:
 	// Sets default values for this character's properties
 	AKZCharacter();
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -45,18 +43,24 @@ protected:
 	TObjectPtr<class UInputAction> MoveAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> MoveEndAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> LookAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> AttackAction;	
 
 
-	USkeletalMeshComponent* Weapon; 
+	TObjectPtr<class AKZSpearWeapon>  m_AKzWeaponSpear;
 
 
 	void Move(const FInputActionValue& Value);
+	void Move_End();
 	void Look(const FInputActionValue& Value);
 	void Attack_Spear();
 
 
+private:
+	
 };

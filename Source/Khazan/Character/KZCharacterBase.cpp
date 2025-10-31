@@ -6,6 +6,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimMontage.h"
 #include "KZComboActionData_1.h"
+#include "Physics/KZCollision.h"
+#include "Animation/KZAnimInstance.h"
+
+
 
 // Sets default values
 AKZCharacterBase::AKZCharacterBase()
@@ -18,8 +22,6 @@ AKZCharacterBase::AKZCharacterBase()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
-
-
 	
 
 
@@ -137,6 +139,7 @@ void AKZCharacterBase::ComboActionBegin()
 	ComboTimerHandle.Invalidate();
 	SetComboCheckTimer(); 
 
+
 }
 
 void AKZCharacterBase::ComboActionEnd(class UAnimMontage* TargetMontage, bool IsProperlyEnded)
@@ -184,6 +187,40 @@ void AKZCharacterBase::ComboCheck()
 
 		HasNexComboCommand = false; // 입력값 초기화
 	}
+
+}
+
+void AKZCharacterBase::AttackHitCheck()
+{
+	FHitResult OutHitResult;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this); //Trace Tage : 콜리전 분석할때의 태그 정보 , 복잡한 형태의 충돌체 캡슐이나를 감지할지, inignoreActor 무시할 엑터(자기자신이니깐 this넣음)
+
+	const float AttackRange  = 40.0f; 
+	const float AttackRadius = 50.0f;
+	const float AttackDamage = 30.0f; 
+
+	const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();  // 투사 시작 지점
+	const FVector End = Start + GetActorForwardVector() * AttackRange; // 투사 끝 지점
+
+	bool HitDetected = GetWorld()->SweepSingleByChannel(OutHitResult, Start, End, FQuat::Identity, CCHANNEL_KZACTION, FCollisionShape::MakeSphere(AttackRadius), Params);
+
+
+	if (HitDetected) //감지가 되었을때 
+	{
+
+
+
+	}
+
+
+#if ENABLE_DRAW_DEBUG
+
+	FVector CapusleOrigin = Start + (End - Start) * 0.5f; 
+	float CapsuleHalfHegiht = AttackRange * 0.5f; 
+	FColor DrawColor = HitDetected ? FColor::Red : FColor::Green; 
+
+	DrawDebugCapsule(GetWorld(), CapusleOrigin, CapsuleHalfHegiht, AttackRadius, FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(), DrawColor, false, 5.0f);
+#endif
 
 }
 

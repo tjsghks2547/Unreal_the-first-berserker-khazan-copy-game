@@ -12,6 +12,7 @@ UKZAnimInstance::UKZAnimInstance()
 	MovingThreshould = 3.0f;
 }
 
+
 void UKZAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
@@ -29,17 +30,7 @@ void UKZAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
-	if (Movement)
-	{
-		if (!m_bIsAttack)
-		{
-			Velocity = Movement->Velocity;
-			GroundSpeed = Velocity.Size2D();
-			m_bIsIdle = GroundSpeed < MovingThreshould;
-		}
-	}
 
-	
 }
 
 void UKZAnimInstance::AnimNotify_stopattack()

@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Interface/KZAnimationAttackInterface.h"
 #include "KZCharacterBase.generated.h"
 
+
 UCLASS()
-class KHAZAN_API AKZCharacterBase : public ACharacter
+class KHAZAN_API AKZCharacterBase : public ACharacter,public IKZAnimationAttackInterface
 {
 	GENERATED_BODY()
 
@@ -42,4 +44,10 @@ protected:
 	FTimerHandle ComboTimerHandle; // 원하는 시간에 특정 함수를 호출할도록 설정하는 것 
 	
 	bool HasNexComboCommand = false; 
+
+
+// Attack Hit Section 
+
+protected:
+	virtual void AttackHitCheck();
 };

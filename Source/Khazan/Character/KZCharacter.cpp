@@ -8,6 +8,8 @@
 #include "EnhancedInputComponent.h"	
 #include "EnhancedInputSubsystems.h"	
 #include "Animation/KZAnimInstance.h"
+#include "Weapon/KZSpearWeapon.h"
+
 
 
 // Sets default values
@@ -70,27 +72,28 @@ void AKZCharacter::BeginPlay()
 	FName WeaponSocket(TEXT("Weapon_R"));
 	if (GetMesh()->DoesSocketExist(WeaponSocket))
 	{
-		Weapon = NewObject<USkeletalMeshComponent>(this, TEXT("WEAPON"));
+		FActorSpawnParameters SpawnParams; 
+		SpawnParams.Owner = this; 
+		SpawnParams.Instigator = this;	
+		
+		m_AKzWeaponSpear = GetWorld()->SpawnActor<AKZSpearWeapon>
+			(
+				AKZSpearWeapon::StaticClass(),
+				FVector::ZeroVector,
+				FRotator::ZeroRotator,
+				SpawnParams
+			);
 
-		USkeletalMesh* Weapon_Mesh = LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/Character/Mesh/Kazan_Weapon/ThiefSpearWeapon.ThiefSpearWeapon"));
-		if (Weapon_Mesh)
+		if(m_AKzWeaponSpear)
 		{
-			Weapon->SetSkeletalMesh(Weapon_Mesh);
+			//스케일 변경
+			m_AKzWeaponSpear->SetActorScale3D(FVector(1.f, 1.f, 1.f));
+
+			//캐릭터의 손 본(Socket)에 부착 
+			m_AKzWeaponSpear->AttachToComponent(GetMesh(),
+				FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+				WeaponSocket);
 		}
-
-		Weapon->SetupAttachment(GetMesh(), WeaponSocket);
-		Weapon->SetRelativeScale3D(FVector(0.35f, 0.35f, 0.35f));
-
-
-		// 3) 월드에 등록 (중요!)
-		Weapon->RegisterComponent();
-
-		// 4) 소켓에 부착
-		Weapon->AttachToComponent(
-			GetMesh(),
-			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-			WeaponSocket
-		);
 	}
 
 
@@ -117,11 +120,10 @@ void AKZCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 
-	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AKZCharacter::Move);
-	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AKZCharacter::Look);
-	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AKZCharacter::Attack_Spear);
-
-
+	EnhancedInputComponent->BindAction(MoveAction,    ETriggerEvent::Triggered, this, &AKZCharacter::Move);
+	EnhancedInputComponent->BindAction(MoveEndAction, ETriggerEvent::Triggered, this, &AKZCharacter::Move_End);	
+	EnhancedInputComponent->BindAction(LookAction,    ETriggerEvent::Triggered, this, &AKZCharacter::Look);
+	EnhancedInputComponent->BindAction(AttackAction,  ETriggerEvent::Triggered, this, &AKZCharacter::Attack_Spear);
 
 }
 
@@ -137,6 +139,20 @@ void AKZCharacter::Move(const FInputActionValue& Value)
 
 	AddMovementInput(ForwardDirection, MovementVector.X);
 	AddMovementInput(RightDirection, MovementVector.Y);
+
+	m_pAnimInstance->Initialize_PLAYER_PHASE();
+
+	m_pAnimInstance->Set_PLAYER_PHASE(PLAYER_PHASE::PHASE_IDLE);	
+	m_pAnimInstance->Set_State(PLAYER_STATE::WALK);	
+}
+
+void AKZCharacter::Move_End()	
+{
+	// 여기서부터 다시작성하자
+
+	// story작성도 하자 기존에는 bit 플래그를 통해 안하고 
+	// 이동 무브먼트로 작성할려니 좀 힘들다 이런식으로 그래서 bit 플래그로 바꿔서 한 코드 보여주기
+
 }
 
 void AKZCharacter::Look(const FInputActionValue& Value)
@@ -150,5 +166,11 @@ void AKZCharacter::Look(const FInputActionValue& Value)
 void AKZCharacter::Attack_Spear()
 {
 	ProcessComboCommand();
+
+	m_pAnimInstance->Initialize_PLAYER_PHASE();	
+
+	m_pAnimInstance->Set_State(PLAYER_STATE::NORMAL_ATTACK_1);
+	m_pAnimInstance->Set_PLAYER_PHASE(PLAYER_PHASE::PHASE_FIGHT);
+
 }
 
