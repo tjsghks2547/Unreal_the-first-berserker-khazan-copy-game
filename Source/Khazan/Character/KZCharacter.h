@@ -56,7 +56,7 @@ protected:
 
 
 	void Move(const FInputActionValue& Value);
-	void Move_End();
+	void Move_End(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Attack_Spear();
 

@@ -36,19 +36,26 @@ AKZCharacter::AKZCharacter()
 		DefaultMappingContext = InputMappingContextRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionMoveRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Move/IA_Move.IA_Move'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionMoveRef(TEXT("/Game/Input/Move/IA_Move.IA_Move"));
 	if (InputActionMoveRef.Object)
 	{
 		MoveAction = InputActionMoveRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionLookRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Look/IA_Look.IA_Look'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionMoveEndRef(TEXT("/Game/Input/Move/IA_MoveEnd.IA_MoveEnd"));
+	if (InputActionMoveEndRef.Object)
+	{
+		MoveEndAction = InputActionMoveEndRef.Object;
+	}
+
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionLookRef(TEXT("/Game/Input/Look/IA_Look.IA_Look"));
 	if (InputActionLookRef.Object)
 	{
 		LookAction = InputActionLookRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionAttackActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/Input/Attack/IA_Attack_1.IA_Attack_1'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionAttackActionRef(TEXT("/Game/Input/Attack/IA_Attack_1.IA_Attack_1"));
 	if (InputActionAttackActionRef.Object)
 	{
 		AttackAction = InputActionAttackActionRef.Object;
@@ -111,6 +118,8 @@ void AKZCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//여기서 이제 해당 상태를 다뤄줘야 할듯 아무입력이 없으면 다시 phase 원상태로 돌린다던지.
+
 }
 
 // Called to bind functionality to input
@@ -142,17 +151,27 @@ void AKZCharacter::Move(const FInputActionValue& Value)
 
 	m_pAnimInstance->Initialize_PLAYER_PHASE();
 
-	m_pAnimInstance->Set_PLAYER_PHASE(PLAYER_PHASE::PHASE_IDLE);	
-	m_pAnimInstance->Set_State(PLAYER_STATE::WALK);	
+	m_pAnimInstance->Set_PLAYER_PHASE(PLAYER_PHASE::PHASE_IDLE);
+	m_pAnimInstance->Set_State(PLAYER_STATE::WALK);
+	
 }
 
-void AKZCharacter::Move_End()	
+void AKZCharacter::Move_End(const FInputActionValue& Value)	
 {
 	// 여기서부터 다시작성하자
-
+	
 	// story작성도 하자 기존에는 bit 플래그를 통해 안하고 
 	// 이동 무브먼트로 작성할려니 좀 힘들다 이런식으로 그래서 bit 플래그로 바꿔서 한 코드 보여주기
 
+	FVector2D MovementVector = Value.Get<FVector2D>();
+
+	if(MovementVector.Length() < KINDA_SMALL_NUMBER)
+	{
+		m_pAnimInstance->Set_State(PLAYER_STATE::WALK_END);
+	}
+
+
+	//UE_LOG(LogTemp, Warning, TEXT("Speed2D: %f"), MovementVector.Length());	
 }
 
 void AKZCharacter::Look(const FInputActionValue& Value)

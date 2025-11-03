@@ -11,6 +11,7 @@ enum PLAYER_STATE
 {
 	IDLE,
 	WALK,
+	WALK_END,
 	NORMAL_ATTACK_1,
 	NORMAL_ATTACK_2,
 	NORMAL_ATTACK_3,
@@ -83,7 +84,7 @@ protected:
 	uint8 m_bIsAttack : 1 = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
-	uint8        m_iCurState = 0;
+	uint8       m_iCurState = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	int32       m_iPhaseState = 1;
