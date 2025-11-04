@@ -70,6 +70,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	FVector Velocity;
 
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	float GroundSpeed;
 
@@ -83,11 +84,22 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	uint8 m_bIsAttack : 1 = false;
 
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	uint8       m_iCurState = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	int32       m_iPhaseState = 1;
+
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	uint8 m_bLeftTurnOnOff : 1 = false;		
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	uint8 m_bRightTurnOnOff : 1 = false;	
+
+
 
 private:
 	UFUNCTION()

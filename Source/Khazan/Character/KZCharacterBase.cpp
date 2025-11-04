@@ -35,7 +35,7 @@ AKZCharacterBase::AKZCharacterBase()
 
 	m_pMoveComponent->bOrientRotationToMovement = true; 
 	// 이동하는 방향(속도 벡터)을 바라보게 캐릭터의 Yaw 회전 자동 조절
-	m_pMoveComponent->RotationRate = FRotator(0.0f, 2000.f, 0.0f);	
+	m_pMoveComponent->RotationRate = FRotator(0.0f, 500.f, 0.0f);	
 	// bOrientRotationToMovement()가 true일 때 방향 전환 시 1초에 몇도 속도(Yaw 속도) 로 회전할 지를 결정 
 	m_pMoveComponent->JumpZVelocity = 700.f; 
 	// 점프 시작 시 위쪽(Z)으로 주는 초기속도
