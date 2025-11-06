@@ -8,6 +8,7 @@
 #include "InputActionValue.h"
 #include "KZCharacter.generated.h"
 
+
 UCLASS()
 class KHAZAN_API AKZCharacter : public AKZCharacterBase
 {
@@ -62,5 +63,7 @@ protected:
 
 
 private:
+
+	class CKzStateMgr* m_pKzStateMgr = nullptr;
 	
 };

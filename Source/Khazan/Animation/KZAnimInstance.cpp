@@ -4,7 +4,7 @@
 #include "Animation/KZAnimInstance.h"
 #include "GameFrameWork/Character.h"
 #include "GameFrameWork/CharacterMovementComponent.h"	
-#include "Character/KZCharacter.h"	
+#include "Character/Khazan/KZCharacter.h"	
 
 
 UKZAnimInstance::UKZAnimInstance()

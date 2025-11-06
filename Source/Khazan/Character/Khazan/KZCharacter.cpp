@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Character/KZCharacter.h"
+#include "Character/Khazan/KZCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "InputMappingContext.h"
@@ -9,6 +9,8 @@
 #include "EnhancedInputSubsystems.h"	
 #include "Animation/KZAnimInstance.h"
 #include "Weapon/KZSpearWeapon.h"
+#include "State/KzStateMgr.h"
+
 
 
 
@@ -61,7 +63,7 @@ AKZCharacter::AKZCharacter()
 		AttackAction = InputActionAttackActionRef.Object;
 	}
 
-
+	m_pKzStateMgr = CKzStateMgr::Create();	
 }
 
 // Called when the game starts or when spawned
@@ -108,7 +110,8 @@ void AKZCharacter::BeginPlay()
 	m_pAnimInstance = Cast<UKZAnimInstance>(m_pSkeletalMesh->GetAnimInstance());
 	
 
-
+	// State ³Ö±â 
+	//m_pStateMgr->Add_State(IDLE,  )
 
 
 }
@@ -138,6 +141,12 @@ void AKZCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void AKZCharacter::Move(const FInputActionValue& Value)
 {
+	m_pAnimInstance->Initialize_PLAYER_PHASE();	
+
+	m_pAnimInstance->Set_PLAYER_PHASE(PLAYER_PHASE::PHASE_IDLE);
+	m_pAnimInstance->Set_State(PLAYER_STATE::RUN);
+
+
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
 	const FRotator Rotation = Controller->GetControlRotation();
@@ -149,11 +158,6 @@ void AKZCharacter::Move(const FInputActionValue& Value)
 	AddMovementInput(ForwardDirection, MovementVector.X);
 	AddMovementInput(RightDirection, MovementVector.Y);
 
-	m_pAnimInstance->Initialize_PLAYER_PHASE();
-
-	m_pAnimInstance->Set_PLAYER_PHASE(PLAYER_PHASE::PHASE_IDLE);
-	m_pAnimInstance->Set_State(PLAYER_STATE::WALK);
-	
 }
 
 void AKZCharacter::Move_End(const FInputActionValue& Value)	
@@ -167,7 +171,7 @@ void AKZCharacter::Move_End(const FInputActionValue& Value)
 
 	if(MovementVector.Length() < KINDA_SMALL_NUMBER)
 	{
-		m_pAnimInstance->Set_State(PLAYER_STATE::WALK_END);
+		m_pAnimInstance->Set_State(PLAYER_STATE::RUN_END);
 	}
 
 
